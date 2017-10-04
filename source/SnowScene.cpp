@@ -1,5 +1,6 @@
 #include "SnowScene.hpp"
 #include "SnowFlake.hpp"
+#include "SnowCloud.hpp"
 #include "Shader.hpp"
 #include <atlas/core/GLFW.hpp>
 #include <atlas/utils/GUI.hpp>
@@ -8,11 +9,10 @@
 SnowScene::SnowScene() :
 	mPaused(true)
 {
-	std::unique_ptr<SnowFlake> snowflake = std::make_unique<SnowFlake>();
-	snowflake->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-	snowflake->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));	
-	snowflake->applyTransformations();
-	mGeometries.push_back(std::move(snowflake));
+	//An interesting observation is that due to the depth of the cloud,
+	//some snowflakes appear to fall faster despite all snowflakes
+	//having the same downward forces acting upon them, creating an interesting effect
+	mSnowCloud.setBoundingBox(glm::vec3(-3.0f, 3.0f, -2.0f), glm::vec3(3.0f, 3.0f, 2.0f));	
 }
 
 SnowScene::~SnowScene()
@@ -71,6 +71,15 @@ void SnowScene::renderScene()
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_FirstUseEver);
 	
 	ImGui::Begin("Scene Options");
+	ImGui::Text(
+		"Snowflake Count: %d",
+		SnowFlake::getSnowFlakeCount()
+	);
+	ImGui::Text(
+		"Application average %.3f ms/frame (%.1f FPS)",
+		1000.0f / ImGui::GetIO().Framerate,
+		ImGui::GetIO().Framerate
+	);
 	ImGui::Checkbox("Simulation Paused", &mPaused);
 	ImGui::End();
 			
@@ -95,11 +104,33 @@ void SnowScene::updateScene(double time)
 	
 	if(!mPaused)
 	{
+		mSnowCloud.updateGeometry(mTime);
+
 		for(auto &geometry : mGeometries)
 		{
 			geometry->updateGeometry(mTime);
 		}
+
+		//Removes snowflakes that are too low in the scene.
+		//Prevents an infinite number of snowflakes from being stored
+		for (auto it = mGeometries.begin(); it != mGeometries.end(); )
+		{
+			SnowFlake* snowflake = dynamic_cast<SnowFlake *>(it->get());
+			if(snowflake && snowflake->getPosition().y < -10)
+			{
+				it = mGeometries.erase(it);				
+			}
+			else
+			{
+				++it;
+			}
+		}
 	}
+}
+
+void SnowScene::addSnowFlake(std::unique_ptr<SnowFlake> snowflake)
+{
+	mGeometries.push_back(std::move(snowflake));
 }
 
 void SnowScene::onSceneEnter()

@@ -18,9 +18,13 @@ constexpr GLint SnowFlake::INDICES[][1] = {
     {2},
 };
 
+int SnowFlake::snowFlakeCount = 0;
+
 SnowFlake::SnowFlake() :
     mMass(0.01)
 {
+    ++(SnowFlake::snowFlakeCount);
+
     glGenVertexArrays(1, &mVao);
 	glGenBuffers(1, &mPositionBuffer);
 	glGenBuffers(1, &mColorBuffer);
@@ -53,6 +57,11 @@ SnowFlake::SnowFlake() :
     
     mNormalDistribution = std::normal_distribution<float>(5.0f, 1.0f);    
     mUniformDistribution = std::uniform_real_distribution<float>(0.0f, 3.1415926f);   
+}
+
+SnowFlake::~SnowFlake()
+{
+    --(SnowFlake::snowFlakeCount);    
 }
 
 void SnowFlake::setMass(float mass)
@@ -205,4 +214,9 @@ void SnowFlake::renderGeometry(atlas::math::Matrix4 const &projection, atlas::ma
 	glBindVertexArray(0);
 
     mShaders[0].disableShaders();
+}
+
+int SnowFlake::getSnowFlakeCount()
+{
+    return SnowFlake::snowFlakeCount;
 }

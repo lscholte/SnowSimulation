@@ -11,6 +11,7 @@ class SnowFlake : public atlas::utils::Geometry
     public:
 
         SnowFlake();
+        ~SnowFlake();        
 
         void computeGeometry(atlas::core::Time<> const &t);
 
@@ -31,7 +32,9 @@ class SnowFlake : public atlas::utils::Geometry
 		void setAcceleration(glm::vec3 const &acceleration);
         glm::vec3 getAcceleration() const;
         
-        void setModel(glm::mat4 const &model);	
+        void setModel(glm::mat4 const &model);
+        
+        static int getSnowFlakeCount();
         
     private:
 
@@ -52,7 +55,9 @@ class SnowFlake : public atlas::utils::Geometry
         
         static const GLfloat POSITIONS[][3];
 		static const GLfloat COLORS[][3];
-        static const GLint INDICES[][1];        
+        static const GLint INDICES[][1];
+        
+        static int snowFlakeCount;
 };
 
 #endif
