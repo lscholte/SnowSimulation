@@ -1,4 +1,5 @@
 #include "SnowScene.hpp"
+#include "SnowFlake.hpp"
 #include "Shader.hpp"
 #include <atlas/core/GLFW.hpp>
 #include <atlas/utils/GUI.hpp>
@@ -6,7 +7,12 @@
 
 SnowScene::SnowScene() :
 	mPaused(true)
-{		
+{
+	std::unique_ptr<SnowFlake> snowflake = std::make_unique<SnowFlake>();
+	snowflake->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+	snowflake->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));	
+	snowflake->applyTransformations();
+	mGeometries.push_back(std::move(snowflake));
 }
 
 SnowScene::~SnowScene()
@@ -52,14 +58,14 @@ void SnowScene::renderScene()
 	
 	float aspectRatio = 1.0f;
 	
-	glm::vec3 eye(0.0, 0.0, 10.0);
+	glm::vec3 eye(0.0, 0.0, 3.0);
 	glm::vec3 look(0.0, 0.0, 0.0);
 	glm::vec3 up(0.0, 1.0, 0.0);
 	
 	glm::mat4 view = glm::lookAt(eye, look, up);
 	
 	//Render black background
-	glClearColor(0.7f, 0.7f, 0.7f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_FirstUseEver);
@@ -98,13 +104,13 @@ void SnowScene::updateScene(double time)
 
 void SnowScene::onSceneEnter()
 {
-	glDepthFunc(GL_LESS);
-    glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	// glDepthFunc(GL_LESS);
+    // glEnable(GL_DEPTH_TEST);
+	// glEnable(GL_CULL_FACE);
 }
 
 void SnowScene::onSceneExit()
 {
-    glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+    // glDisable(GL_DEPTH_TEST);
+	// glDisable(GL_CULL_FACE);
 }
