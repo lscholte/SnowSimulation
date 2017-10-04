@@ -1,0 +1,13 @@
+# OS X
+.DS_Store
+
+# Build folders #
+build/
+doc/
+bin/
+html/
+
+# Generated files #
+generated/
+doc/html
+include/atlas/Atlas.hpp
