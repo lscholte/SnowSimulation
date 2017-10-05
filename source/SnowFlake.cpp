@@ -1,21 +1,13 @@
 #include "SnowFlake.hpp"
 #include "Shader.hpp"
-#include <iostream>
 #include <atlas/utils/Application.hpp>
 
 constexpr GLfloat SnowFlake::POSITIONS[][3] = {
-    {0.0, 0.0, 0.0},
-    {0.0, 1.0, 0.0},    
+    {0.0, 0.0, 0.0}
 };
 
 constexpr GLfloat SnowFlake::COLORS[][3] = {
-    {1.0, 1.0, 1.0},
-    {1.0, 1.0, 1.0},    
-};
-
-constexpr GLint SnowFlake::INDICES[][1] = {
-    {1},
-    {2},
+    {1.0, 1.0, 1.0}
 };
 
 int SnowFlake::snowFlakeCount = 0;
@@ -28,17 +20,16 @@ SnowFlake::SnowFlake() :
     glGenVertexArrays(1, &mVao);
 	glGenBuffers(1, &mPositionBuffer);
 	glGenBuffers(1, &mColorBuffer);
-	glGenBuffers(1, &mIndexBuffer);
 	
 	glBindVertexArray(mVao);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(SnowFlake::POSITIONS), SnowFlake::POSITIONS, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat), SnowFlake::POSITIONS, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(SnowFlake::COLORS), SnowFlake::COLORS, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat), SnowFlake::COLORS, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
     
@@ -182,8 +173,6 @@ glm::vec3 SnowFlake::computeAcceleration(glm::vec3 const &position, glm::vec3 co
     float theta = mUniformDistribution(mGenerator);
     glm::vec3 offset = mMass * glm::vec3(offsetRadius*cos(theta), 0.0f, offsetRadius*sin(theta));
 
-    // std::cerr << offset.x << " " << offset.y << " " << offset.z << "\n";
-
     glm::vec3 netForce = forceGravity + forceViscosity + offset;
 
     return netForce / mMass;    
@@ -202,15 +191,10 @@ void SnowFlake::renderGeometry(atlas::math::Matrix4 const &projection, atlas::ma
 	const GLint MODEL_VIEW_PROJECTION_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "ModelViewProjection");
 	glUniformMatrix4fv(MODEL_VIEW_PROJECTION_UNIFORM_LOCATION, 1, GL_FALSE, &modelViewProjection[0][0]);
 
-    // glLineWidth(10.0f);   
     glPointSize(10.0f); 
 	
 	glBindVertexArray(mVao);
-	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(SnowFlake::INDICES), SnowFlake::INDICES, GL_STATIC_DRAW);
-	glDrawElements(GL_POINTS, 2, GL_UNSIGNED_INT, (void *) 0);
-
+    glDrawArrays(GL_POINTS, 0, 1);
 	glBindVertexArray(0);
 
     mShaders[0].disableShaders();

@@ -47,7 +47,7 @@ class SnowFlake : public atlas::utils::Geometry
         glm::vec3 computeAcceleration(glm::vec3 const &position, glm::vec3 const &velocity);
         
         GLuint mVao;
-        GLuint mPositionBuffer, mColorBuffer, mIndexBuffer;
+        GLuint mPositionBuffer, mColorBuffer;
 
         std::default_random_engine mGenerator;
         std::normal_distribution<float> mNormalDistribution;  
