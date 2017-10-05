@@ -34,5 +34,4 @@ void SnowCloud::updateGeometry(atlas::core::Time<> const &t)
         
         ((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->addSnowFlake(std::move(snowflake));        
     }
-
 }

@@ -3,6 +3,7 @@
 
 #include "SnowFlake.hpp"
 #include "SnowCloud.hpp"
+#include "SnowFall.hpp"
 #include <atlas/utils/Scene.hpp>
 
 class SnowScene : public atlas::utils::Scene
@@ -30,7 +31,7 @@ class SnowScene : public atlas::utils::Scene
 
 		bool mPaused;
 
-		SnowCloud mSnowCloud;
+		SnowFall mSnowFall;
 };
 
 #endif

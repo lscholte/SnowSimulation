@@ -2,49 +2,12 @@
 #include "Shader.hpp"
 #include <atlas/utils/Application.hpp>
 
-constexpr GLfloat SnowFlake::POSITIONS[][3] = {
-    {0.0, 0.0, 0.0}
-};
-
-constexpr GLfloat SnowFlake::COLORS[][3] = {
-    {1.0, 1.0, 1.0}
-};
-
 int SnowFlake::snowFlakeCount = 0;
 
 SnowFlake::SnowFlake() :
     mMass(0.01)
 {
     ++(SnowFlake::snowFlakeCount);
-
-    glGenVertexArrays(1, &mVao);
-	glGenBuffers(1, &mPositionBuffer);
-	glGenBuffers(1, &mColorBuffer);
-	
-	glBindVertexArray(mVao);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat), SnowFlake::POSITIONS, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat), SnowFlake::COLORS, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    
-    glBindVertexArray(0);
-        
-    std::vector<atlas::gl::ShaderUnit> shaderUnits
-    {
-        atlas::gl::ShaderUnit(generated::Shader::getShaderDirectory() + "/scene.vert", GL_VERTEX_SHADER),
-        atlas::gl::ShaderUnit(generated::Shader::getShaderDirectory() + "/scene.frag", GL_FRAGMENT_SHADER)
-    };
-    
-    mShaders.push_back(atlas::gl::Shader(shaderUnits));
-    
-    mShaders[0].compileShaders();
-    mShaders[0].linkShaders();
     
     mNormalDistribution = std::normal_distribution<float>(5.0f, 1.0f);    
     mUniformDistribution = std::uniform_real_distribution<float>(0.0f, 3.1415926f);   
@@ -181,23 +144,6 @@ glm::vec3 SnowFlake::computeAcceleration(glm::vec3 const &position, glm::vec3 co
 void SnowFlake::setModel(glm::mat4 const &model)
 {
 	mModel = model;
-}
-
-void SnowFlake::renderGeometry(atlas::math::Matrix4 const &projection, atlas::math::Matrix4 const &view)
-{
-	mShaders[0].enableShaders();
-	
-	glm::mat4 modelViewProjection = projection * view * mModel;
-	const GLint MODEL_VIEW_PROJECTION_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "ModelViewProjection");
-	glUniformMatrix4fv(MODEL_VIEW_PROJECTION_UNIFORM_LOCATION, 1, GL_FALSE, &modelViewProjection[0][0]);
-
-    glPointSize(10.0f); 
-	
-	glBindVertexArray(mVao);
-    glDrawArrays(GL_POINTS, 0, 1);
-	glBindVertexArray(0);
-
-    mShaders[0].disableShaders();
 }
 
 int SnowFlake::getSnowFlakeCount()

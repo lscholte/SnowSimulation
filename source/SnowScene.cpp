@@ -12,7 +12,9 @@ SnowScene::SnowScene() :
 	//An interesting observation is that due to the depth of the cloud,
 	//some snowflakes appear to fall faster despite all snowflakes
 	//having the same downward forces acting upon them, creating an interesting effect
-	mSnowCloud.setBoundingBox(glm::vec3(-3.0f, 3.0f, -2.0f), glm::vec3(3.0f, 3.0f, 2.0f));	
+	std::unique_ptr<SnowCloud> snowCloud = std::make_unique<SnowCloud>();
+	snowCloud->setBoundingBox(glm::vec3(-3.0f, 3.0f, -2.0f), glm::vec3(3.0f, 3.0f, 2.0f));
+	mGeometries.push_back(std::move(snowCloud));
 }
 
 SnowScene::~SnowScene()
@@ -83,6 +85,7 @@ void SnowScene::renderScene()
 	ImGui::Checkbox("Simulation Paused", &mPaused);
 	ImGui::End();
 			
+	mSnowFall.renderGeometry(mProjection, view);
 	for(auto &geometry : mGeometries)
 	{
 		geometry->drawGui();
@@ -104,33 +107,17 @@ void SnowScene::updateScene(double time)
 	
 	if(!mPaused)
 	{
-		mSnowCloud.updateGeometry(mTime);
-
 		for(auto &geometry : mGeometries)
 		{
 			geometry->updateGeometry(mTime);
 		}
-
-		//Removes snowflakes that are too low in the scene.
-		//Prevents an infinite number of snowflakes from being stored
-		for (auto it = mGeometries.begin(); it != mGeometries.end(); )
-		{
-			SnowFlake* snowflake = dynamic_cast<SnowFlake *>(it->get());
-			if(snowflake && snowflake->getPosition().y < -10)
-			{
-				it = mGeometries.erase(it);				
-			}
-			else
-			{
-				++it;
-			}
-		}
+		mSnowFall.updateGeometry(mTime);		
 	}
 }
 
 void SnowScene::addSnowFlake(std::unique_ptr<SnowFlake> snowflake)
 {
-	mGeometries.push_back(std::move(snowflake));
+	mSnowFall.addSnowFlake(std::move(snowflake));
 }
 
 void SnowScene::onSceneEnter()
