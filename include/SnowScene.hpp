@@ -24,6 +24,7 @@ class SnowScene : public atlas::utils::Scene
 		void onSceneExit() override;
 		
 		void addSnowFlake(std::unique_ptr<SnowFlake> snowflake);
+		SnowFall const& getSnowFall() const;
 		
 	private:
 		glm::mat4 mProjection;

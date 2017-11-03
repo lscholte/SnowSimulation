@@ -24,6 +24,7 @@ class SnowCloud : public atlas::utils::Geometry
 
         std::default_random_engine mGenerator;
         std::uniform_real_distribution<float> mUniformDistributionX, mUniformDistributionY, mUniformDistributionZ;
+        std::uniform_real_distribution<float> mUniformDistributionVector, mUniformDistributionAngle;        
 
         float mSnowFlakeRate;
         

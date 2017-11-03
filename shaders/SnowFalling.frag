@@ -8,19 +8,11 @@ in vec4 SnowMapCoord;
 
 uniform bool UseDiffuseMap;
 uniform sampler2D DiffuseMap;
-uniform bool UseSnowMap;
-uniform sampler2DShadow SnowMap;
 
 out vec4 FragColor;
 
 void main()
 {
-
-	float snow = 0.0f;
-	if(UseSnowMap)
-	{
-		snow = textureProj(SnowMap, SnowMapCoord);
-	}
 
 	vec3 diffuseTexture;
 	if(UseDiffuseMap)
@@ -48,11 +40,6 @@ void main()
 	else
 	{
 		color = diffuseTexture;
-	}
-
-	if(snow < 0.1)
-	{
-		color = vec3(1.0, 1.0, 1.0);
 	}
 
 	FragColor = vec4(color, 1.0);

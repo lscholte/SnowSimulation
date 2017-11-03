@@ -8,8 +8,10 @@
 
 
 SnowCloud::SnowCloud() :
-    mSnowFlakeRate(2.0f)
+    mSnowFlakeRate(6.0f)
 {    
+    mUniformDistributionVector = std::uniform_real_distribution<float>(0.0f, 1.0f);
+    mUniformDistributionAngle = std::uniform_real_distribution<float>(0.0f, (float) (2.0*M_PI));
 }
 
 
@@ -31,6 +33,15 @@ void SnowCloud::updateGeometry(atlas::core::Time<> const &t)
         std::unique_ptr<SnowFlake> snowflake = std::make_unique<SnowFlake>();
         snowflake->setPosition(glm::vec3(mUniformDistributionX(mGenerator), mUniformDistributionY(mGenerator), mUniformDistributionZ(mGenerator)));
         snowflake->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+        
+        float vectorTheta = acos(2.0*mUniformDistributionVector(mGenerator) - 1);
+        float vectorPhi = 2.0 * M_PI * mUniformDistributionVector(mGenerator);  
+        
+        glm::vec3 rotationVector = glm::vec3(sin(vectorTheta)*cos(vectorPhi), sin(vectorTheta)*sin(vectorPhi), cos(vectorTheta));
+    
+        float angleTheta = mUniformDistributionAngle(mGenerator);
+    
+        snowflake->setRotation(glm::rotate(glm::mat4(1.0f), angleTheta, rotationVector));
         
         ((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->addSnowFlake(std::move(snowflake));        
     }

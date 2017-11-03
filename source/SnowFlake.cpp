@@ -10,7 +10,7 @@ SnowFlake::SnowFlake() :
     ++(SnowFlake::snowFlakeCount);
     
     mNormalDistribution = std::normal_distribution<float>(5.0f, 1.0f);    
-    mUniformDistribution = std::uniform_real_distribution<float>(0.0f, 3.1415926f);   
+    mUniformDistribution = std::uniform_real_distribution<float>(0.0f, 3.1415926f);
 }
 
 SnowFlake::~SnowFlake()
@@ -144,6 +144,16 @@ glm::vec3 SnowFlake::computeAcceleration(glm::vec3 const &position, glm::vec3 co
 void SnowFlake::setModel(glm::mat4 const &model)
 {
 	mModel = model;
+}
+
+glm::mat4 SnowFlake::getRotation() const
+{
+    return mRotationMatrix;
+}
+
+void SnowFlake::setRotation(glm::mat4 const &rotation)
+{
+    mRotationMatrix = rotation;
 }
 
 int SnowFlake::getSnowFlakeCount()

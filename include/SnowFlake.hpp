@@ -32,6 +32,9 @@ class SnowFlake : public atlas::utils::Geometry
         glm::vec3 getAcceleration() const;
         
         void setModel(glm::mat4 const &model);
+
+        glm::mat4 getRotation() const;
+        void setRotation(glm::mat4 const &rotation);        
         
         static int getSnowFlakeCount();
         
@@ -47,9 +50,12 @@ class SnowFlake : public atlas::utils::Geometry
         
         std::default_random_engine mGenerator;
         std::normal_distribution<float> mNormalDistribution;  
-        std::uniform_real_distribution<float> mUniformDistribution;          
-        
+        std::uniform_real_distribution<float> mUniformDistribution;  
+                
         static int snowFlakeCount;
+
+        glm::mat4 mRotationMatrix;
+        
 };
 
 #endif
