@@ -148,7 +148,7 @@ void SnowFall::renderGeometry(atlas::math::Matrix4 const &projection, atlas::mat
     glGetIntegerv(GL_VIEWPORT, m_viewport);
 
     // Surface Snow Shader
-    {
+    {        
         mShaders[0].enableShaders();
         
         //TODO: use orthographic sky projection
@@ -176,7 +176,7 @@ void SnowFall::renderGeometry(atlas::math::Matrix4 const &projection, atlas::mat
         
         mShaders[0].disableShaders();
         
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);                        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);           
     }
     
     

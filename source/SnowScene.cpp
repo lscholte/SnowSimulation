@@ -14,7 +14,7 @@ SnowScene::SnowScene() :
 	//some snowflakes appear to fall faster despite all snowflakes
 	//having the same downward forces acting upon them, creating an interesting effect
 	std::unique_ptr<SnowCloud> snowCloud = std::make_unique<SnowCloud>();
-	snowCloud->setBoundingBox(glm::vec3(-3.0f, 3.0f, -2.0f), glm::vec3(3.0f, 3.0f, 2.0f));
+	snowCloud->setBoundingBox(glm::vec3(-10.0f, 12.0f, -10.0f), glm::vec3(10.0f, 12.0f, 10.0f));
 
 	std::unique_ptr<Surface> surface = std::make_unique<Surface>();
 
@@ -85,7 +85,7 @@ void SnowScene::renderScene()
 	
 	float aspectRatio = 1.0f;
 	
-	glm::vec3 eye(0.0, 1.0, 3.0);
+	glm::vec3 eye(0.0, 5.0, -15.0);
 	glm::vec3 look(0.0, 0.0, 0.0);
 	glm::vec3 up(0.0, 1.0, 0.0);
 	

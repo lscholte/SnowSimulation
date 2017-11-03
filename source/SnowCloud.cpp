@@ -8,7 +8,7 @@
 
 
 SnowCloud::SnowCloud() :
-    mSnowFlakeRate(6.0f)
+    mSnowFlakeRate(10.0f)
 {    
     mUniformDistributionVector = std::uniform_real_distribution<float>(0.0f, 1.0f);
     mUniformDistributionAngle = std::uniform_real_distribution<float>(0.0f, (float) (2.0*M_PI));

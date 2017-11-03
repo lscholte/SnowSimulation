@@ -9,8 +9,8 @@ SnowFlake::SnowFlake() :
 {
     ++(SnowFlake::snowFlakeCount);
     
-    mNormalDistribution = std::normal_distribution<float>(5.0f, 1.0f);    
-    mUniformDistribution = std::uniform_real_distribution<float>(0.0f, 3.1415926f);
+    mNormalDistribution = std::normal_distribution<float>(0.0f, 2.0f);    
+    mUniformDistribution = std::uniform_real_distribution<float>(0.0f, (float) (2.0*M_PI));
 }
 
 SnowFlake::~SnowFlake()
@@ -132,7 +132,7 @@ glm::vec3 SnowFlake::computeAcceleration(glm::vec3 const &position, glm::vec3 co
     glm::vec3 forceViscosity = -kv * n * mVelocity;
 
     //Adds the flake flutter effect
-    float offsetRadius = std::max(0.0f, mNormalDistribution(mGenerator));
+    float offsetRadius = std::fabs(mNormalDistribution(mGenerator));
     float theta = mUniformDistribution(mGenerator);
     glm::vec3 offset = mMass * glm::vec3(offsetRadius*cos(theta), 0.0f, offsetRadius*sin(theta));
 
