@@ -2,6 +2,7 @@
 #include "SnowFlake.hpp"
 #include "SnowCloud.hpp"
 #include "Surface.hpp"
+#include "SnowOverlay.hpp"
 #include "Shader.hpp"
 #include <atlas/core/GLFW.hpp>
 #include <atlas/utils/GUI.hpp>
@@ -17,29 +18,11 @@ SnowScene::SnowScene() :
 	snowCloud->setBoundingBox(glm::vec3(-10.0f, 12.0f, -10.0f), glm::vec3(10.0f, 12.0f, 10.0f));
 
 	std::unique_ptr<Surface> surface = std::make_unique<Surface>();
+	std::unique_ptr<SnowOverlay> snowOverlay = std::make_unique<SnowOverlay>();	
 
 	mGeometries.push_back(std::move(snowCloud));
 	mGeometries.push_back(std::move(surface));
-
-
-
-
-
-
-	// glGenFramebuffers(1, &mSnowOverlayFBO);
-    // glBindFramebuffer(GL_FRAMEBUFFER, mSnowOverlayFBO);
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mSnowOverlayTexture, 0);
-    // glDrawBuffer(GL_COLOR_ATTACHMENT0); //Only need to do this once.
-    // GLuint clearColor[4] = {0, 0, 0, 0};
-    // glClearBufferuiv(GL_COLOR, 0, clearColor);
-    // fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    // if (fboStatus != GL_FRAMEBUFFER_COMPLETE) {
-    //     fprintf(stderr, "glCheckFramebufferStatus: %x\n", fboStatus);
-    // }
-	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	
-
-	//TODO: Create a SnowOverlay shader
+	mGeometries.push_back(std::move(snowOverlay));	
 }
 
 SnowScene::~SnowScene()
@@ -71,7 +54,7 @@ void SnowScene::screenResizeEvent(int width, int height)
 	glViewport(0, 0, width, height);
 
 	float aspectRatio = (float) width / height;
-	mProjection = glm::perspective(glm::radians(70.0f), aspectRatio, 0.01f, 100.0f);	
+	mProjection = glm::perspective(glm::radians(70.0f), aspectRatio, 0.01f, 100.0f);
 
 	atlas::utils::Gui::getInstance().screenResize(width, height);
 
@@ -114,18 +97,6 @@ void SnowScene::renderScene()
 			
 	mSnowFall.renderGeometry(mProjection, view);
 
-	// //Render snow overlay
-	// {
-	// 	glBindFramebuffer(GL_FRAMEBUFFER, mSnowOverlayFBO);
-    //     glViewport(0, 0, mTextureResolution, mTextureResolution);
-	// 	glEnable(GL_FRAMEBUFFER_SRGB);
-		
-
-	// 	//TODO: Send uniforms
-
-	// 	//TODO: Render quad
-	// }
-
 	for(auto &geometry : mGeometries)
 	{
 		geometry->drawGui();
@@ -167,13 +138,13 @@ SnowFall const& SnowScene::getSnowFall() const
 
 void SnowScene::onSceneEnter()
 {
-	// glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
-	// glEnable(GL_CULL_FACE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 }
 
 void SnowScene::onSceneExit()
 {
     glDisable(GL_DEPTH_TEST);
-	// glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);	
 }

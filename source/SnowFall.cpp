@@ -159,7 +159,8 @@ void SnowFall::renderGeometry(atlas::math::Matrix4 const &projection, atlas::mat
         // glEnable(GL_DEPTH_TEST);        
 
         glm::mat4 skyView = glm::lookAt(glm::vec3(0.0f, 15.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        glm::mat4 skyProjection = glm::perspective(glm::radians(70.0f), 1.0f, 0.01f, 100.0f);
+        // glm::mat4 skyProjection = glm::perspective(glm::radians(70.0f), 1.0f, 0.01f, 100.0f);
+        glm::mat4 skyProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.01f, 100.0f);            
         glm::mat4 modelViewProjection = skyProjection * skyView * mModel;    
 
         const GLint MODEL_VIEW_PROJECTION_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "ModelViewProjection");
@@ -190,8 +191,6 @@ void SnowFall::renderGeometry(atlas::math::Matrix4 const &projection, atlas::mat
         const GLint MODEL_VIEW_PROJECTION_UNIFORM_LOCATION = glGetUniformLocation(mShaders[1].getShaderProgram(), "ModelViewProjection");
         glUniformMatrix4fv(MODEL_VIEW_PROJECTION_UNIFORM_LOCATION, 1, GL_FALSE, &modelViewProjection[0][0]);      
     
-        glPointSize(10.0f);
-
         glBindVertexArray(mVao);        
         glDrawElements(GL_TRIANGLES, mVertexIndices.size(), GL_UNSIGNED_INT, (void *) 0);
         glBindVertexArray(0); 

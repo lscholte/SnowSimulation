@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 project(SnowSimulation LANGUAGES CXX)
 
+find_package(CGAL REQUIRED)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
+	set(CMAKE_CXX_FLAGS "-frounding-math")
+endif()
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -21,11 +27,12 @@ add_subdirectory(${SOURCE_DIR})
 add_subdirectory(${SHADER_DIR})
 add_subdirectory(${ASSET_DIR})
 
+include_directories(${CGAL_INCLUDE_DIRS})
 include_directories(${ATLAS_INCLUDE_DIRS})
 include_directories(${INCLUDE_DIR})
 include_directories(${GENERATED_DIR})
 
-link_libraries(${APP_NAME} ${ATLAS_LIBRARIES})
+link_libraries(${CGAL_LIBRARY} ${APP_NAME} ${ATLAS_LIBRARIES})
 
 source_group(include FILES ${INCLUDE_FILES})
 source_group(source FILES ${SOURCE_FILES})

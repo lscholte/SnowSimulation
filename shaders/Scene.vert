@@ -8,13 +8,11 @@ layout(location = 3) in vec2 TextureCoords;
 
 uniform mat4 ModelViewProjection;
 uniform mat4 Model;
-uniform mat4 SkyMatrix;
 
 out vec4 FragmentColor;
 out vec4 FragmentWorldPosition;
 out vec3 FragmentNormal;
 out vec2 FragmentTextureCoords;
-out vec4 SnowMapCoord;
 
 void main()
 {
@@ -24,6 +22,4 @@ void main()
 	FragmentWorldPosition = Model * vec4(Position, 1.0);
 	FragmentNormal = Normal;
 	FragmentTextureCoords = TextureCoords;
-	SnowMapCoord = SkyMatrix * vec4(Position, 1.0);
-
 }

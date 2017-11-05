@@ -15,9 +15,8 @@ class Surface : public atlas::utils::Geometry
         
         GLuint mVao;
         GLuint mPositionBuffer, mNormalBuffer, mColorBuffer, mTextureCoordBuffer;   
-        
-        // GLfloat *mVertexPositions, *mVertexNormals, *mVertexColors;
-        static const GLfloat vertexPositions[][3], vertexNormals[][3], vertexColors[][3], textureCoordinates[][2];
+  
+        static const GLfloat vertexPositions[][3], vertexNormals[][3], vertexColors[][3], textureCoordinates[][2];        
 };
 
 #endif
