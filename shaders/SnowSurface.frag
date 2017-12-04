@@ -5,7 +5,7 @@ in vec4 FragmentWorldPosition;
 void main()
 {
     
-    if(FragmentWorldPosition.y > 0.1)
+    if(FragmentWorldPosition.y > 0.105)
     {
         discard;
     }

@@ -4,6 +4,7 @@
 #include "SnowFlake.hpp"
 #include "SnowCloud.hpp"
 #include "SnowFall.hpp"
+#include "SnowOverlay.hpp"
 #include <atlas/utils/Scene.hpp>
 
 class SnowScene : public atlas::utils::Scene
@@ -25,6 +26,7 @@ class SnowScene : public atlas::utils::Scene
 		
 		void addSnowFlake(std::unique_ptr<SnowFlake> snowflake);
 		SnowFall const& getSnowFall() const;
+		SnowOverlay & getSnowOverlay();
 		
 	private:
 		glm::mat4 mProjection;
@@ -33,6 +35,9 @@ class SnowScene : public atlas::utils::Scene
 		bool mPaused;
 
 		SnowFall mSnowFall;
+		SnowOverlay mSnowOverlay;
+
+		float mTheta, mRow;
 };
 
 #endif

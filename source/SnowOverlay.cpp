@@ -2,112 +2,112 @@
 #include "Shader.hpp"
 #include "SnowScene.hpp"
 #include <atlas/utils/Application.hpp>
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/IO/Polyhedron_iostream.h>
-#include <CGAL/Filtered_kernel.h>
-#include <CGAL/Cartesian.h>
-#include "LinearSubdivision.hpp"
 #include "Asset.hpp"
-#include <fstream>
-#include <iostream>
-
-using Real = float;
-using Kernel0 = CGAL::Cartesian<Real>;
-using Kernel = CGAL::Filtered_kernel<Kernel0>;
-using Polyhedron = CGAL::Polyhedron_3<Kernel>;
-using Point = Polyhedron::Point_3;
-using Halfedge = Polyhedron::Halfedge;
-using Face = Polyhedron::Facet;
 
 SnowOverlay::SnowOverlay()
-{
+{    
+    int factor = 50;
 
-    Polyhedron mesh;
+    float stepX = 20.0f / factor;
+    float stepZ = 20.0f / factor;
 
-    std::ifstream quadFile((generated::Asset::getAssetDirectory() + "/quad.off").c_str());
-    if(quadFile)
+    for(int i = 0; i <= factor; ++i)
     {
-        std::stringstream buffer;
-        buffer << quadFile.rdbuf();
-        quadFile.close();
-
-        if(!(buffer >> mesh))
+        GLfloat z = -10.0f + i*stepZ;
+        for(int j = 0; j <= factor; ++j)
         {
-            std::cerr << "cannot read mesh from file\n";
-            exit(1);
-        }
+            GLfloat x = -10.0f + j*stepX;
+            mPositionsAlpha.push_back(glm::vec4(x, 0.005f, z, 0.0f));
+        }        
     }
 
-    for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+    for(int i = 0; i <= factor-1; ++i)
     {
-        Point &p = it->point();
-        p = Point(
-            p[0]*20.0f - 10.0f,
-            0.001f, //keeps overlay slightly above surface
-            p[1]*20.0f - 10.0f            
-        );
-    }    
-    LinearSubdivision::subdivide(mesh, 5);    
+        for(int j = 0; j <= factor; ++j)
+        {
+            mIndices.push_back((factor+1)*i + j);
+            mIndices.push_back((factor+1)*(i+1) + j);
+        }
+        mIndices.push_back(0xFFFFFFFF);
+    }
 
-    mNumVertices = 3*mesh.size_of_facets();
+    int indexOffset = mPositionsAlpha.size();
     
-    GLfloat positions[mesh.size_of_facets()*9];
-    GLfloat colors[mesh.size_of_facets()*12];
+    //Allow heigt for snow overlay
 
-    int i = 0;
-    int j = 0;
-    for (auto it = mesh.facets_begin(); it != mesh.facets_end(); ++it, i += 9, j += 12)
+    for(int i = 0; i <= factor; ++i)
     {
-        auto halfedgeCirc = it->facet_begin();
-        const Point &p1 = halfedgeCirc->vertex()->point();
-        ++halfedgeCirc;
-        const Point &p2 = halfedgeCirc->vertex()->point();
-        ++halfedgeCirc;
-		const Point &p3 = halfedgeCirc->vertex()->point();
-                
-        positions[i] = p1.x();
-        positions[i + 1] = p1.y();
-        positions[i + 2] = p1.z();
+        GLfloat x = -10.0f + i*stepX;
+        mPositionsAlpha.push_back(glm::vec4(x, 0.005f, -10.0f, 1.0f));
+    }     
+    
+    for(int i = 0; i <= factor; ++i)
+    {
+        GLfloat z = -10.0f + i*stepZ;
+        mPositionsAlpha.push_back(glm::vec4(10.0f, 0.005f, z, 1.0f));
+    } 
 
-        colors[j] = 0.0f;
-        colors[j + 1] = 0.0f;
-        colors[j + 2] = 0.0f;
-        colors[j + 3] = 0.0f;        
+    for(int i = 0; i <= factor; ++i)
+    {
+        GLfloat x = 10.0f - i*stepX;
+        mPositionsAlpha.push_back(glm::vec4(x, 0.005f, 10.0f, 1.0f));
+    } 
 
-        positions[i + 3] = p2.x();
-        positions[i + 4] = p2.y();
-        positions[i + 5] = p2.z();
+    for(int i = 0; i <= factor; ++i)
+    {
+        GLfloat z = 10.0f - i*stepZ;
+        mPositionsAlpha.push_back(glm::vec4(-10.0f, 0.005f, z, 1.0f));
+    } 
+    
+    mIndices.push_back(0xFFFFFFFF);
+    
+    //indices
+    for(int i = 0; i <= factor; ++i)
+    {
+        mIndices.push_back(i + indexOffset);
+        mIndices.push_back(i);
+    }
 
-        colors[j + 4] = 0.0f;
-        colors[j + 5] = 0.0f;
-        colors[j + 6] = 0.0f;
-        colors[j + 7] = 0.0f;
+    indexOffset += factor + 1;
+    mIndices.push_back(0xFFFFFFFF);    
+    
+    for(int i = 0; i <= factor; ++i)
+    {
+        mIndices.push_back(i + indexOffset);
+        mIndices.push_back((factor+1)*i + factor);
+    }
 
-        positions[i + 6] = p3.x();
-        positions[i + 7] = p3.y();
-        positions[i + 8] = p3.z();
+    indexOffset += factor + 1;
+    mIndices.push_back(0xFFFFFFFF);
+    
+    for(int i = 0; i <= factor; ++i)
+    {
+        mIndices.push_back(i + indexOffset);
+        mIndices.push_back((factor+1)*factor + factor - i);
+    }
 
-        colors[j + 8] = 0.0f;
-        colors[j + 9] = 0.0f;
-        colors[j + 10] = 0.0f;
-        colors[j + 11] = 0.0f;
+    indexOffset += factor + 1;
+    mIndices.push_back(0xFFFFFFFF);    
+    
+    for(int i = 0; i <= factor; ++i)
+    {
+        mIndices.push_back(i + indexOffset);
+        mIndices.push_back((factor+1)*(factor-i));
     }
 
     glGenVertexArrays(1, &mVao);
-    glGenBuffers(1, &mPositionBuffer);
-    glGenBuffers(1, &mColorBuffer);
+    glGenBuffers(1, &mPositionAlphaBuffer);
+    glGenBuffers(1, &mIndexBuffer);    
 
     glBindVertexArray(mVao);            
-
-    glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, mesh.size_of_facets()*9*sizeof(GLfloat), positions, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	
-	glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, mesh.size_of_facets()*12*sizeof(GLfloat), colors, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, mPositionAlphaBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 4*mPositionsAlpha.size()*sizeof(GLfloat), mPositionsAlpha.data(), GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size()*sizeof(GLuint), mIndices.data(), GL_STATIC_DRAW);
        
     glBindVertexArray(0);        
     
@@ -123,6 +123,10 @@ SnowOverlay::SnowOverlay()
     mShaders[0].linkShaders(); 
 }
 
+SnowOverlay::~SnowOverlay()
+{
+}
+
 
 void SnowOverlay::renderGeometry(atlas::math::Matrix4 const &projection, atlas::math::Matrix4 const &view)
 {
@@ -135,7 +139,6 @@ void SnowOverlay::renderGeometry(atlas::math::Matrix4 const &projection, atlas::
 
 
     glm::mat4 skyView = glm::lookAt(glm::vec3(0.0f, 15.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    // glm::mat4 skyProjection = glm::perspective(glm::radians(70.0f), 1.0f, 0.01f, 100.0f);
     glm::mat4 skyProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.01f, 100.0f);            
     glm::mat4 offsetMatrix = glm::mat4(
         0.5f, 0.0f, 0.0f, 0.0f,
@@ -153,11 +156,71 @@ void SnowOverlay::renderGeometry(atlas::math::Matrix4 const &projection, atlas::
     glUniform1i(SCENE_USE_SNOW_MAP_UNIFORM_LOCATION, true);    
     glBindTexture(GL_TEXTURE_2D, ((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->getSnowFall().getSnowDepthTexture());
 
+    glPrimitiveRestartIndex(0xFFFFFFFF);
+    glEnable(GL_PRIMITIVE_RESTART);
+
     glBindVertexArray(mVao);    
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //Draw wireframe    
-    glDrawArrays(GL_TRIANGLES, 0, mNumVertices);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);    
+    glDrawElements(GL_TRIANGLE_STRIP, mIndices.size(), GL_UNSIGNED_INT, (void *) 0);    
     glBindVertexArray(0);
 
+    glDisable(GL_PRIMITIVE_RESTART);
+
     mShaders[0].disableShaders();
+}
+
+void SnowOverlay::updateGeometry(atlas::core::Time<> const &t)
+{
+    mNormals = std::vector<glm::vec3>(mPositionsAlpha.size(), glm::vec3(0.0, 0.0, 0.0));    
+    bool flip = false;
+    for(int i = 0; i < mIndices.size() - 2; ++i)
+    {
+        
+        int index = mIndices[i];
+        int index2 = mIndices[i+1];
+        int index3 = mIndices[i+2];
+
+        if(index == 0xFFFFFFFF || index2 == 0xFFFFFFFF || index3 == 0xFFFFFFFF)
+        {
+            flip = false;
+            continue;
+        }
+
+        glm::vec3 a(mPositionsAlpha[index]);
+        glm::vec3 b(mPositionsAlpha[index2]);
+        glm::vec3 c(mPositionsAlpha[index3]);
+    }
+
+    glBindVertexArray(mVao);            
+	glBindBuffer(GL_ARRAY_BUFFER, mPositionAlphaBuffer);
+    glBufferData(GL_ARRAY_BUFFER, 4*mPositionsAlpha.size()*sizeof(GLfloat), mPositionsAlpha.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
+}
+
+void SnowOverlay::updateVertexNearestTo(glm::vec3 const &query)
+{
+    float maxDist = 0.5;
+    float factor = 0.0001f;
+    int i = 0;
+    for(glm::vec4 &positionAlpha : mPositionsAlpha)
+    {
+        if(i >= 51*51)
+        {
+            break;
+        }
+        ++i;
+
+        float dist = std::sqrt(
+            std::pow(query.x - positionAlpha.x, 2.0f) + 
+            std::pow(query.y - positionAlpha.y, 2.0f) + 
+            std::pow(query.z - positionAlpha.z, 2.0f)
+        );
+        float amount = std::min(0.005f, factor/dist);
+
+        positionAlpha.w += amount;
+
+        if(positionAlpha.w >= 1.0f)
+        {
+            positionAlpha.y += amount;            
+        }
+    }
 }

@@ -1,8 +1,9 @@
 #include "SnowFall.hpp"
 #include "Shader.hpp"
+#include <atlas/utils/GUI.hpp>
 
 SnowFall::SnowFall()
-{    
+{        
     mSnowMapResolution = 4096;
     glGenTextures(1, &mSnowDepthTexture);
     glBindTexture(GL_TEXTURE_2D, mSnowDepthTexture);
@@ -38,7 +39,21 @@ SnowFall::SnowFall()
     glGenVertexArrays(1, &mVao);
 	glGenBuffers(1, &mPositionBuffer);
     glGenBuffers(1, &mColorBuffer);
-    glGenBuffers(1, &mIndexBuffer);    
+    glGenBuffers(1, &mIndexBuffer);   
+    
+    glBindVertexArray(mVao);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, 0, mVertexPositions.data(), GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, 0, mVertexColors.data(), GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+    glBindVertexArray(0);    
     
     std::vector<atlas::gl::ShaderUnit> shaderUnitsSnow
     {
@@ -60,6 +75,8 @@ SnowFall::SnowFall()
 
     mShaders[1].compileShaders();
     mShaders[1].linkShaders();
+
+    mSnowflakeSizeDistribution = std::normal_distribution<float>(0.025f, 0.005f);        
 }
 
 SnowFall::~SnowFall()
@@ -82,7 +99,7 @@ void SnowFall::updateGeometry(atlas::core::Time<> const &t)
     {
         snowFlake->updateGeometry(t);
 
-        float snowflakeSize = 0.02;
+        float snowflakeSize = mSnowflakeSizeDistribution(mGenerator);
 
         mVertexPositions.push_back(snowFlake->getPosition());
         mVertexPositions.push_back(snowFlake->getPosition() + glm::vec3(glm::vec4(snowflakeSize, 0.0, 0.0, 0.0)*snowFlake->getRotation()));
@@ -106,11 +123,24 @@ void SnowFall::updateGeometry(atlas::core::Time<> const &t)
         ++i;
     }
 
+    glBindVertexArray(mVao);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, 3*mVertexPositions.size()*sizeof(GLfloat), mVertexPositions.data(), GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, 3*mVertexColors.size()*sizeof(GLfloat), mVertexColors.data(), GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mVertexIndices.size()*sizeof(GLint), mVertexIndices.data(), GL_DYNAMIC_DRAW);
+        
+    glBindVertexArray(0);
+
     //Removes snowflakes that are too low in the scene.
     //Prevents an infinite number of snowflakes from being stored
     for (auto it = mSnowFlakes.begin(); it != mSnowFlakes.end(); )
     {
-        if((*it)->getPosition().y < -1)
+        if((*it)->getPosition().y < 0)
         {
             it = mSnowFlakes.erase(it);				
         }
@@ -123,43 +153,24 @@ void SnowFall::updateGeometry(atlas::core::Time<> const &t)
 
 void SnowFall::renderGeometry(atlas::math::Matrix4 const &projection, atlas::math::Matrix4 const &view)
 {
-    
-    glBindVertexArray(mVao);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, 3*mVertexPositions.size()*sizeof(GLfloat), mVertexPositions.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
-    glBufferData(GL_ARRAY_BUFFER, 3*mVertexColors.size()*sizeof(GLfloat), mVertexColors.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mVertexIndices.size()*sizeof(GLint), mVertexIndices.data(), GL_STATIC_DRAW);
-        
-    glBindVertexArray(0);
-
-    // GLint currentFBO;
-    // glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
-
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
 
     // Surface Snow Shader
     {        
+        GLint m_viewport[4];
+        glGetIntegerv(GL_VIEWPORT, m_viewport);
+
         mShaders[0].enableShaders();
         
-        //TODO: use orthographic sky projection
         glBindFramebuffer(GL_FRAMEBUFFER, mSnowFBO);
         glClearDepth(1.0f);
         // glClear(GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, mSnowMapResolution, mSnowMapResolution);
-        // glEnable(GL_DEPTH_TEST);        
+        // glEnable(GL_DEPTH_TEST);    
+
+        // glPolygonOffset(mShadowSlopeScaleBias, mShadowDepthBias);        
+        // glEnable(GL_POLYGON_OFFSET_FILL);
 
         glm::mat4 skyView = glm::lookAt(glm::vec3(0.0f, 15.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        // glm::mat4 skyProjection = glm::perspective(glm::radians(70.0f), 1.0f, 0.01f, 100.0f);
         glm::mat4 skyProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.01f, 100.0f);            
         glm::mat4 modelViewProjection = skyProjection * skyView * mModel;    
 
@@ -169,22 +180,23 @@ void SnowFall::renderGeometry(atlas::math::Matrix4 const &projection, atlas::mat
         const GLint MODEL_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "Model");
         glUniformMatrix4fv(MODEL_UNIFORM_LOCATION, 1, GL_FALSE, &mModel[0][0]);
 
-        glBindVertexArray(mVao);        
+        glBindVertexArray(mVao);  
         glDrawElements(GL_TRIANGLES, mVertexIndices.size(), GL_UNSIGNED_INT, (void *) 0);
         glBindVertexArray(0);        
-        
-        // glDisable(GL_DEPTH_TEST);     
-        
+                
         mShaders[0].disableShaders();
         
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);           
+        // glPolygonOffset(0.0f, 0.0f);        
+        // glDisable(GL_POLYGON_OFFSET_FILL);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);     
+        
+        glViewport(m_viewport[0], m_viewport[1], m_viewport[2], m_viewport[3]);        
     }
     
     
     //Falling Snow Shader
-    {
-        glViewport(m_viewport[0], m_viewport[1], m_viewport[2], m_viewport[3]);
-        
+    {        
         mShaders[1].enableShaders();
         
         glm::mat4 modelViewProjection = projection * view * mModel;

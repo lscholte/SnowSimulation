@@ -1,5 +1,6 @@
 #include "SnowFlake.hpp"
 #include "Shader.hpp"
+#include "SnowScene.hpp"
 #include <atlas/utils/Application.hpp>
 
 int SnowFlake::snowFlakeCount = 0;
@@ -15,6 +16,7 @@ SnowFlake::SnowFlake() :
 
 SnowFlake::~SnowFlake()
 {
+    ((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->getSnowOverlay().updateVertexNearestTo(mPosition);            
     --(SnowFlake::snowFlakeCount);    
 }
 

@@ -9,20 +9,20 @@
 #include <glm/gtc/type_ptr.hpp>
 
 SnowScene::SnowScene() :
-	mPaused(true)
+	mPaused(true),
+	mRow(5.0),
+	mTheta(0.0)
 {
-	//An interesting observation is that due to the depth of the cloud,
-	//some snowflakes appear to fall faster despite all snowflakes
-	//having the same downward forces acting upon them, creating an interesting effect
 	std::unique_ptr<SnowCloud> snowCloud = std::make_unique<SnowCloud>();
-	snowCloud->setBoundingBox(glm::vec3(-10.0f, 12.0f, -10.0f), glm::vec3(10.0f, 12.0f, 10.0f));
-
+	// snowCloud->setBoundingBox(glm::vec3(-10.0f, 12.0f, -10.0f), glm::vec3(10.0f, 12.0f, 10.0f));
+	snowCloud->setBoundingBox(glm::vec3(-12.0f, 12.0f, -12.0f), glm::vec3(12.0f, 12.0f, 12.0f));
+	
 	std::unique_ptr<Surface> surface = std::make_unique<Surface>();
-	std::unique_ptr<SnowOverlay> snowOverlay = std::make_unique<SnowOverlay>();	
+	// std::unique_ptr<SnowOverlay> snowOverlay = std::make_unique<SnowOverlay>();	
 
 	mGeometries.push_back(std::move(snowCloud));
 	mGeometries.push_back(std::move(surface));
-	mGeometries.push_back(std::move(snowOverlay));	
+	// mGeometries.push_back(std::move(snowOverlay));	
 }
 
 SnowScene::~SnowScene()
@@ -46,6 +46,21 @@ void SnowScene::mouseScrollEvent(double xOffset, double yOffset)
 
 void SnowScene::keyPressEvent(int key, int scancode, int action, int mods)
 {
+	switch(key)
+	{
+		case GLFW_KEY_RIGHT:
+			mTheta -= 2.0 * (M_PI/180.0f);
+			break;
+		case GLFW_KEY_LEFT:
+			mTheta += 2.0 * (M_PI/180.0f);		
+			break;
+		case GLFW_KEY_UP:
+			mRow += 0.1;
+			break;
+		case GLFW_KEY_DOWN:
+			mRow -= 0.1;
+			break;
+	}
 	atlas::utils::Gui::getInstance().keyPress(key, scancode, action, mods);
 }
 
@@ -68,13 +83,12 @@ void SnowScene::renderScene()
 	
 	float aspectRatio = 1.0f;
 	
-	glm::vec3 eye(0.0, 5.0, -15.0);
+	// glm::vec3 eye(0.0, 5.0, -15.0);
+	glm::vec3 eye(20.0f*cos(mTheta), mRow, 20.0f*sin(mTheta));
 	glm::vec3 look(0.0, 0.0, 0.0);
 	glm::vec3 up(0.0, 1.0, 0.0);
 	
 	glm::mat4 view = glm::lookAt(eye, look, up);
-
-	glm::mat4 skyView = glm::lookAt(glm::vec3(0.0f, 100.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	
 	//Render black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -103,6 +117,8 @@ void SnowScene::renderScene()
 		geometry->renderGeometry(mProjection, view);
 	}
 
+	mSnowOverlay.renderGeometry(mProjection, view);
+
 	ImGui::Render();				
 }
 
@@ -122,7 +138,8 @@ void SnowScene::updateScene(double time)
 		{
 			geometry->updateGeometry(mTime);
 		}
-		mSnowFall.updateGeometry(mTime);		
+		mSnowFall.updateGeometry(mTime);
+		mSnowOverlay.updateGeometry(mTime);		
 	}
 }
 
@@ -136,9 +153,15 @@ SnowFall const& SnowScene::getSnowFall() const
 	return mSnowFall;
 }
 
+SnowOverlay & SnowScene::getSnowOverlay()
+{
+	return mSnowOverlay;
+}
+
 void SnowScene::onSceneEnter()
 {
-    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 }

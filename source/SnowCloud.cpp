@@ -2,13 +2,12 @@
 #include "SnowFlake.hpp"
 #include "SnowScene.hpp"
 #include "Shader.hpp"
-#include <iostream>
 #include <atlas/utils/Application.hpp>
 
 
 
 SnowCloud::SnowCloud() :
-    mSnowFlakeRate(10.0f)
+    mSnowFlakeRate(10.0f) //10 looks good
 {    
     mUniformDistributionVector = std::uniform_real_distribution<float>(0.0f, 1.0f);
     mUniformDistributionAngle = std::uniform_real_distribution<float>(0.0f, (float) (2.0*M_PI));
