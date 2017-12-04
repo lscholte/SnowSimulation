@@ -85,7 +85,11 @@ SnowFall::~SnowFall()
 
 void SnowFall::addSnowFlake(std::unique_ptr<SnowFlake> snowflake)
 {
-	mSnowFlakes.push_back(std::move(snowflake));
+    //A safeguard to prevent framerate drops due to too many snowflakes
+    if(mSnowFlakes.size() < 4500)
+    {
+        mSnowFlakes.push_back(std::move(snowflake));
+    }
 }
 
 void SnowFall::updateGeometry(atlas::core::Time<> const &t)

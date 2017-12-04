@@ -199,7 +199,7 @@ void SnowOverlay::updateGeometry(atlas::core::Time<> const &t)
 void SnowOverlay::updateVertexNearestTo(glm::vec3 const &query)
 {
     float maxDist = 0.5;
-    float factor = 0.0001f;
+    float factor = 0.001f;
     int i = 0;
     for(glm::vec4 &positionAlpha : mPositionsAlpha)
     {
@@ -214,7 +214,8 @@ void SnowOverlay::updateVertexNearestTo(glm::vec3 const &query)
             std::pow(query.y - positionAlpha.y, 2.0f) + 
             std::pow(query.z - positionAlpha.z, 2.0f)
         );
-        float amount = std::min(0.005f, factor/dist);
+
+        float amount = dist > maxDist ? 0.0f : std::min(0.005f, factor/dist);
 
         positionAlpha.w += amount;
 

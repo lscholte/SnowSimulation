@@ -107,6 +107,7 @@ void SnowScene::renderScene()
 		ImGui::GetIO().Framerate
 	);
 	ImGui::Checkbox("Simulation Paused", &mPaused);
+	ImGui::SliderFloat3("Wind Force", value_ptr(mWindForce), -50.0f, 50.0f);	
 	ImGui::End();
 			
 	mSnowFall.renderGeometry(mProjection, view);
@@ -156,6 +157,11 @@ SnowFall const& SnowScene::getSnowFall() const
 SnowOverlay & SnowScene::getSnowOverlay()
 {
 	return mSnowOverlay;
+}
+
+glm::vec3 SnowScene::getWindForce() 
+{
+	return mWindForce;
 }
 
 void SnowScene::onSceneEnter()
