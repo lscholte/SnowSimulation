@@ -49,7 +49,7 @@ void main()
 	}
 
 	vec3 color = FragmentColor.rgb;
-	float alpha = FragmentColor.a;
+	float alpha = min(1.0, FragmentColor.a);
 	if(snow < 0.1)
 	{
 		//color = (FragmentColor + 1.2*vec4(1.0, 1.0, 1.0, 1.0)) / 2.2;
@@ -66,8 +66,9 @@ void main()
 
 		if(UseNormalMap) {
 			mat3 TBN = cotangent_frame(N, V, FragmentTextureCoords);
-			N = normalize(2*texture(NormalMap, FragmentTextureCoords).xyz-1);
-			N = normalize(TBN * N);
+			vec3 NMapped = normalize(2*texture(NormalMap, FragmentTextureCoords).xyz-1);
+			NMapped = normalize(TBN * NMapped);
+			N = normalize(alpha*NMapped + (1-alpha)*N);
     	}
 
 		float ambient = 0.5;
