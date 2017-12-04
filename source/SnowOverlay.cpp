@@ -4,6 +4,7 @@
 #include <atlas/utils/Application.hpp>
 #include <atlas/utils/GUI.hpp>
 #include "Asset.hpp"
+#include <stb/stb_image.h>
 
 SnowOverlay::SnowOverlay() :
     mUseSnowMap(true)
@@ -20,6 +21,8 @@ SnowOverlay::SnowOverlay() :
         {
             GLfloat x = -10.0f + j*stepX;
             mPositionsAlpha.push_back(glm::vec4(x, 0.005f, z, 0.0f));
+            mNormals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+            mTextureCoords.push_back(glm::vec2((float) (j+1) / (factor+2), (float) (i+1) / (factor+2)));
         }        
     }
 
@@ -41,24 +44,32 @@ SnowOverlay::SnowOverlay() :
     {
         GLfloat x = -10.0f + i*stepX;
         mPositionsAlpha.push_back(glm::vec4(x, 0.005f, -10.0f, 1.0f));
+        mNormals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        mTextureCoords.push_back(glm::vec2((float) (i+1) / (factor+2), 0.0f));
     }     
     
     for(int i = 0; i <= factor; ++i)
     {
         GLfloat z = -10.0f + i*stepZ;
         mPositionsAlpha.push_back(glm::vec4(10.0f, 0.005f, z, 1.0f));
+        mNormals.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        mTextureCoords.push_back(glm::vec2(1.0f, (float) (i+1) / (factor+2)));
     } 
 
     for(int i = 0; i <= factor; ++i)
     {
         GLfloat x = 10.0f - i*stepX;
         mPositionsAlpha.push_back(glm::vec4(x, 0.005f, 10.0f, 1.0f));
+        mNormals.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+        mTextureCoords.push_back(glm::vec2((float) (i+1) / (factor+2), 1.0f));
     } 
 
     for(int i = 0; i <= factor; ++i)
     {
         GLfloat z = 10.0f - i*stepZ;
         mPositionsAlpha.push_back(glm::vec4(-10.0f, 0.005f, z, 1.0f));
+        mNormals.push_back(glm::vec3(-1.0f, 0.0f, 0.0f));
+        mTextureCoords.push_back(glm::vec2(0.0f, (float) (i+1) / (factor+2)));
     } 
     
     mIndices.push_back(0xFFFFFFFF);
@@ -99,6 +110,8 @@ SnowOverlay::SnowOverlay() :
 
     glGenVertexArrays(1, &mVao);
     glGenBuffers(1, &mPositionAlphaBuffer);
+    glGenBuffers(1, &mNormalBuffer);
+    glGenBuffers(1, &mTextureCoordBuffer);
     glGenBuffers(1, &mIndexBuffer);    
 
     glBindVertexArray(mVao);            
@@ -108,10 +121,45 @@ SnowOverlay::SnowOverlay() :
 	glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
 
+    glBindBuffer(GL_ARRAY_BUFFER, mNormalBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 3*mNormals.size()*sizeof(GLfloat), mNormals.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mTextureCoordBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 2*mTextureCoords.size()*sizeof(GLfloat), mTextureCoords.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size()*sizeof(GLuint), mIndices.data(), GL_STATIC_DRAW);
        
-    glBindVertexArray(0);        
+    glBindVertexArray(0);
+    
+    int imageWidth, imageHeight, imageComp;    
+    stbi_set_flip_vertically_on_load(1);    
+    stbi_uc* image = stbi_load((generated::Asset::getAssetDirectory() + "/snow_normal_map.jpg").c_str(), &imageWidth, &imageHeight, &imageComp, 3);
+    stbi_set_flip_vertically_on_load(0);
+    
+    glGenTextures(1, &mNormalTextureId);
+    glActiveTexture(GL_TEXTURE2);    
+    glBindTexture(GL_TEXTURE_2D, mNormalTextureId);
+    if(imageComp == 3)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);        
+    }
+    else if(imageComp == 4)
+    {   
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);        
+    }
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);        
+
+    stbi_image_free(image);
     
     std::vector<atlas::gl::ShaderUnit> shaderUnits
     {
@@ -157,6 +205,13 @@ void SnowOverlay::renderGeometry(atlas::math::Matrix4 const &projection, atlas::
     glUniform1i(SCENE_SNOW_MAP_UNIFORM_LOCATION, 1);
     glUniform1i(SCENE_USE_SNOW_MAP_UNIFORM_LOCATION, mUseSnowMap);    
     glBindTexture(GL_TEXTURE_2D, ((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->getSnowFall().getSnowDepthTexture());
+
+    glActiveTexture(GL_TEXTURE2);
+    GLint SCENE_NORMAL_MAP_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "NormalMap");
+    GLint SCENE_USE_NORMAL_MAP_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "UseNormalMap");    
+    glUniform1i(SCENE_NORMAL_MAP_UNIFORM_LOCATION, 2);
+    glUniform1i(SCENE_USE_NORMAL_MAP_UNIFORM_LOCATION, true);    
+    glBindTexture(GL_TEXTURE_2D, mNormalTextureId);
 
     glPrimitiveRestartIndex(0xFFFFFFFF);
     glEnable(GL_PRIMITIVE_RESTART);

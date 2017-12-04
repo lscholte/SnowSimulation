@@ -20,12 +20,15 @@ class SnowOverlay : public atlas::utils::Geometry
     private:
         
         GLuint mVao;
-        GLuint mPositionAlphaBuffer, mNormalBuffer, mIndexBuffer;               
+        GLuint mPositionAlphaBuffer, mNormalBuffer, mTextureCoordBuffer, mIndexBuffer;  
+
+        GLuint mNormalTextureId;             
         
         int mNumVertices;
 
         std::vector<glm::vec4> mPositionsAlpha;
         std::vector<glm::vec3> mNormals; 
+        std::vector<glm::vec2> mTextureCoords;
         std::vector<GLuint> mIndices;
         
         bool mUseSnowMap;

@@ -15,7 +15,7 @@ SnowScene::SnowScene() :
 {
 	std::unique_ptr<SnowCloud> snowCloud = std::make_unique<SnowCloud>();
 	// snowCloud->setBoundingBox(glm::vec3(-10.0f, 12.0f, -10.0f), glm::vec3(10.0f, 12.0f, 10.0f));
-	snowCloud->setBoundingBox(glm::vec3(-12.0f, 12.0f, -12.0f), glm::vec3(12.0f, 12.0f, 12.0f));
+	snowCloud->setBoundingBox(glm::vec3(-10.0f, 12.0f, -10.0f), glm::vec3(10.0f, 12.0f, 10.0f));
 	
 	std::unique_ptr<Surface> surface = std::make_unique<Surface>();
 	// std::unique_ptr<SnowOverlay> snowOverlay = std::make_unique<SnowOverlay>();	
