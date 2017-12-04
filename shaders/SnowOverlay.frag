@@ -16,7 +16,7 @@ void main()
 	//return;
 
 
-	float snow = 0.0f;
+	float snow = 1.0f;
 	if(UseSnowMap)
 	{
 		snow = textureProj(SnowMap, SnowMapCoord);

@@ -29,6 +29,12 @@ void SnowCloud::updateGeometry(atlas::core::Time<> const &t)
 {
     for(int i = 0; i < mSnowFlakeRate; ++i)
     {
+        //A safeguard to prevent framerate drops due to too many snowflakes
+        if(SnowFlake::getSnowFlakeCount() >= 4500)
+        {
+            break;
+        }
+
         std::unique_ptr<SnowFlake> snowflake = std::make_unique<SnowFlake>();
         snowflake->setPosition(glm::vec3(mUniformDistributionX(mGenerator), mUniformDistributionY(mGenerator), mUniformDistributionZ(mGenerator)));
         snowflake->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));

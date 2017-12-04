@@ -119,6 +119,7 @@ void SnowScene::renderScene()
 	}
 
 	mSnowOverlay.renderGeometry(mProjection, view);
+	mSnowOverlay.drawGui();
 
 	ImGui::Render();				
 }

@@ -27,8 +27,7 @@ class SnowScene : public atlas::utils::Scene
 		void addSnowFlake(std::unique_ptr<SnowFlake> snowflake);
 		SnowFall const& getSnowFall() const;
 		SnowOverlay & getSnowOverlay();
-		glm::vec3 getWindForce();		
-
+		glm::vec3 getWindForce();	
 		
 	private:
 		glm::mat4 mProjection;
@@ -42,6 +41,7 @@ class SnowScene : public atlas::utils::Scene
 		float mTheta, mRow;
 
 		glm::vec3 mWindForce;
+
 };
 
 #endif

@@ -12,7 +12,8 @@ class SnowOverlay : public atlas::utils::Geometry
         ~SnowOverlay();
 
         void renderGeometry(atlas::math::Matrix4 const &projection, atlas::math::Matrix4 const &view) override;  
-        void updateGeometry(atlas::core::Time<> const &t) override;            
+        void updateGeometry(atlas::core::Time<> const &t) override;   
+        void drawGui() override;         
 
         void updateVertexNearestTo(glm::vec3 const &query);        
                         
@@ -25,7 +26,9 @@ class SnowOverlay : public atlas::utils::Geometry
 
         std::vector<glm::vec4> mPositionsAlpha;
         std::vector<glm::vec3> mNormals; 
-        std::vector<GLuint> mIndices;     
+        std::vector<GLuint> mIndices;
+        
+        bool mUseSnowMap;
 };
 
 #endif

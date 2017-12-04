@@ -2,9 +2,11 @@
 #include "Shader.hpp"
 #include "SnowScene.hpp"
 #include <atlas/utils/Application.hpp>
+#include <atlas/utils/GUI.hpp>
 #include "Asset.hpp"
 
-SnowOverlay::SnowOverlay()
+SnowOverlay::SnowOverlay() :
+    mUseSnowMap(true)
 {    
     int factor = 50;
 
@@ -153,13 +155,13 @@ void SnowOverlay::renderGeometry(atlas::math::Matrix4 const &projection, atlas::
     GLint SCENE_SNOW_MAP_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "SnowMap");
     GLint SCENE_USE_SNOW_MAP_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "UseSnowMap");    
     glUniform1i(SCENE_SNOW_MAP_UNIFORM_LOCATION, 1);
-    glUniform1i(SCENE_USE_SNOW_MAP_UNIFORM_LOCATION, true);    
+    glUniform1i(SCENE_USE_SNOW_MAP_UNIFORM_LOCATION, mUseSnowMap);    
     glBindTexture(GL_TEXTURE_2D, ((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->getSnowFall().getSnowDepthTexture());
 
     glPrimitiveRestartIndex(0xFFFFFFFF);
     glEnable(GL_PRIMITIVE_RESTART);
 
-    glBindVertexArray(mVao);    
+    glBindVertexArray(mVao);  
     glDrawElements(GL_TRIANGLE_STRIP, mIndices.size(), GL_UNSIGNED_INT, (void *) 0);    
     glBindVertexArray(0);
 
@@ -196,9 +198,18 @@ void SnowOverlay::updateGeometry(atlas::core::Time<> const &t)
     glBindVertexArray(0);
 }
 
+void SnowOverlay::drawGui()
+{
+	ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiSetCond_FirstUseEver);
+	
+	ImGui::Begin("Snow Overlay Options");
+	ImGui::Checkbox("Use Snow Map", &mUseSnowMap);
+	ImGui::End();
+}
+
 void SnowOverlay::updateVertexNearestTo(glm::vec3 const &query)
 {
-    float maxDist = 0.5;
+    float maxDist = 1.0;
     float factor = 0.001f;
     int i = 0;
     for(glm::vec4 &positionAlpha : mPositionsAlpha)
@@ -221,7 +232,7 @@ void SnowOverlay::updateVertexNearestTo(glm::vec3 const &query)
 
         if(positionAlpha.w >= 1.0f)
         {
-            positionAlpha.y += amount;            
+            positionAlpha.y += 0.1f * amount;            
         }
     }
 }
