@@ -5,6 +5,7 @@
 #include <atlas/utils/GUI.hpp>
 #include "Asset.hpp"
 #include <stb/stb_image.h>
+#include <glm/gtc/type_ptr.hpp>
 
 SnowOverlay::SnowOverlay() :
     mUseSnowMap(true)
@@ -212,6 +213,14 @@ void SnowOverlay::renderGeometry(atlas::math::Matrix4 const &projection, atlas::
     glUniform1i(SCENE_NORMAL_MAP_UNIFORM_LOCATION, 2);
     glUniform1i(SCENE_USE_NORMAL_MAP_UNIFORM_LOCATION, true);    
     glBindTexture(GL_TEXTURE_2D, mNormalTextureId);
+
+
+    GLint SCENE_CAMERA_POSITION_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "CameraPosition");    
+    glUniform3fv(SCENE_CAMERA_POSITION_UNIFORM_LOCATION, 1, value_ptr(((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->getCameraPosition()));
+    
+    GLint SCENE_LIGHT_POSITION_UNIFORM_LOCATION = glGetUniformLocation(mShaders[0].getShaderProgram(), "LightPosition");    
+    glUniform3fv(SCENE_LIGHT_POSITION_UNIFORM_LOCATION, 1, value_ptr(((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->getLightPosition()));
+
 
     glPrimitiveRestartIndex(0xFFFFFFFF);
     glEnable(GL_PRIMITIVE_RESTART);

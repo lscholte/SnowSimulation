@@ -7,6 +7,7 @@ in vec4 FragmentWorldPosition;
 in vec2 FragmentTextureCoords;
 
 uniform vec3 CameraPosition;
+uniform vec3 LightPosition;
 
 uniform bool UseSnowMap;
 uniform sampler2DShadow SnowMap;
@@ -59,12 +60,9 @@ void main()
 
 	if(FragmentNormal != vec3(0.0, 0.0, 0.0))
 	{
-		vec3 LightPosition = vec3(15, 15, 15);
-		vec3 worldCameraPos = CameraPosition;
-
 		vec3 L = normalize(FragmentWorldPosition.xyz - LightPosition);
 		vec3 N = -normalize(FragmentNormal);
-		vec3 V = normalize(worldCameraPos - FragmentWorldPosition.xyz);
+		vec3 V = normalize(CameraPosition - FragmentWorldPosition.xyz);
 
 		if(UseNormalMap) {
 			mat3 TBN = cotangent_frame(N, V, FragmentTextureCoords);
@@ -81,7 +79,7 @@ void main()
       		specular = pow(specAngle, 1.0);
     	}
 
-		color = color*ambient + color*diffuse;// + specular*vec3(1.0, 1.0, 1.0);	
+		color = color*ambient + color*diffuse + specular*vec3(1.0, 1.0, 1.0);	
 	}
 	
 

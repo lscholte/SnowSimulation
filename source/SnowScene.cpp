@@ -11,7 +11,8 @@
 SnowScene::SnowScene() :
 	mPaused(true),
 	mRow(5.0),
-	mTheta(0.0)
+	mTheta(0.0),
+	mLightPosition(15.0f, 15.0f, 15.0f)
 {
 	std::unique_ptr<SnowCloud> snowCloud = std::make_unique<SnowCloud>();
 	// snowCloud->setBoundingBox(glm::vec3(-10.0f, 12.0f, -10.0f), glm::vec3(10.0f, 12.0f, 10.0f));
@@ -107,7 +108,8 @@ void SnowScene::renderScene()
 		ImGui::GetIO().Framerate
 	);
 	ImGui::Checkbox("Simulation Paused", &mPaused);
-	ImGui::SliderFloat3("Wind Force", value_ptr(mWindForce), -50.0f, 50.0f);	
+	ImGui::SliderFloat3("Wind Force", value_ptr(mWindForce), -50.0f, 50.0f);
+	ImGui::SliderFloat3("Light Position", value_ptr(mLightPosition), -25.0f, 25.0f);		
 	ImGui::End();
 			
 	mSnowFall.renderGeometry(mProjection, view);
@@ -163,6 +165,16 @@ SnowOverlay & SnowScene::getSnowOverlay()
 glm::vec3 SnowScene::getWindForce() 
 {
 	return mWindForce;
+}
+
+glm::vec3 SnowScene::getCameraPosition() const
+{
+	return glm::vec3(20.0f*cos(mTheta), mRow, 20.0f*sin(mTheta));
+}
+
+glm::vec3 SnowScene::getLightPosition() const
+{
+	return mLightPosition;
 }
 
 void SnowScene::onSceneEnter()

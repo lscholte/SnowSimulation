@@ -23,6 +23,9 @@ class SnowScene : public atlas::utils::Scene
 		void screenResizeEvent(int width, int height) override;		
 		void onSceneEnter() override;
 		void onSceneExit() override;
+
+		glm::vec3 getCameraPosition() const;
+		glm::vec3 getLightPosition() const;
 		
 		void addSnowFlake(std::unique_ptr<SnowFlake> snowflake);
 		SnowFall const& getSnowFall() const;
@@ -41,6 +44,8 @@ class SnowScene : public atlas::utils::Scene
 		float mTheta, mRow;
 
 		glm::vec3 mWindForce;
+
+		glm::vec3 mLightPosition;
 
 };
 
