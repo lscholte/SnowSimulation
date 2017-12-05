@@ -60,8 +60,8 @@ void main()
 
 	if(FragmentNormal != vec3(0.0, 0.0, 0.0))
 	{
-		vec3 L = normalize(FragmentWorldPosition.xyz - LightPosition);
-		vec3 N = -normalize(FragmentNormal);
+		vec3 L = normalize(LightPosition - FragmentWorldPosition.xyz);
+		vec3 N = normalize(FragmentNormal);
 		vec3 V = normalize(CameraPosition - FragmentWorldPosition.xyz);
 
 		if(UseNormalMap) {
