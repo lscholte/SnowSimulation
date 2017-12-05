@@ -60,8 +60,12 @@ void main()
 
 	if(FragmentNormal != vec3(0.0, 0.0, 0.0))
 	{
-		vec3 L = normalize(LightPosition - FragmentWorldPosition.xyz);
 		vec3 N = normalize(FragmentNormal);
+
+		vec3 L = LightPosition - FragmentWorldPosition.xyz;
+		float distance = length(L);
+		L = normalize(L);
+
 		vec3 V = normalize(CameraPosition - FragmentWorldPosition.xyz);
 
 		if(UseNormalMap) {
@@ -77,10 +81,15 @@ void main()
 		if(diffuse > 0.0) {
       		vec3 H = normalize(L + V);
       		float specAngle = max(dot(H, N), 0.0);
-      		specular = pow(specAngle, 1.0);
+      		specular = pow(specAngle, 16.0);
     	}
 
-		color = color*ambient + color*diffuse + specular*vec3(1.0, 1.0, 1.0);	
+    	float constant = 0.3;
+    	float linear = 0.007;
+    	float exponential = 0.1;
+
+    	float attenuation = constant + linear*distance + exponential*distance*distance;
+		color = color*ambient + color*diffuse + specular*vec3(1.0, 1.0, 1.0)/attenuation;	
 	}
 	
 
