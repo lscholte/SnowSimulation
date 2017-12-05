@@ -3,11 +3,10 @@
 #include "SnowScene.hpp"
 #include "Shader.hpp"
 #include <atlas/utils/Application.hpp>
-
-
+#include <atlas/utils/GUI.hpp>
 
 SnowCloud::SnowCloud() :
-    mSnowFlakeRate(10.0f) //10 looks good
+    mSnowFlakeRate(100)
 {    
     mUniformDistributionVector = std::uniform_real_distribution<float>(0.0f, 1.0f);
     mUniformDistributionAngle = std::uniform_real_distribution<float>(0.0f, (float) (2.0*M_PI));
@@ -27,7 +26,16 @@ void SnowCloud::setBoundingBox(glm::vec3 const &a, glm::vec3 const &b)
 
 void SnowCloud::updateGeometry(atlas::core::Time<> const &t)
 {
-    for(int i = 0; i < mSnowFlakeRate; ++i)
+    float rate = mSnowFlakeRate*t.deltaTime;
+    int numSnowflakesToAdd = floor(rate);
+    mStockpiledSnowflakes += rate - numSnowflakesToAdd;
+
+    int additionalSnowflakes = floor(mStockpiledSnowflakes);
+    numSnowflakesToAdd += additionalSnowflakes;
+
+    mStockpiledSnowflakes -= additionalSnowflakes;
+
+    for(int i = 0; i < numSnowflakesToAdd; ++i)
     {
         //A safeguard to prevent framerate drops due to too many snowflakes
         if(SnowFlake::getSnowFlakeCount() >= 4500)
@@ -50,4 +58,13 @@ void SnowCloud::updateGeometry(atlas::core::Time<> const &t)
         
         ((SnowScene *) atlas::utils::Application::getInstance().getCurrentScene())->addSnowFlake(std::move(snowflake));        
     }
+}
+
+void SnowCloud::drawGui()
+{
+	ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiSetCond_FirstUseEver);
+	
+	ImGui::Begin("Snow Cloud Options");
+	ImGui::SliderInt("Snowflakes Per Second", &mSnowFlakeRate, 0, 500);
+	ImGui::End();
 }

@@ -10,13 +10,10 @@ class SnowCloud : public atlas::utils::Geometry
 
         SnowCloud();
 
-        // void computeGeometry(atlas::core::Time<> const &t);
-
         void updateGeometry(atlas::core::Time<> const &t) override;
-        // void renderGeometry(atlas::math::Matrix4 const &projection, atlas::math::Matrix4 const &view) override;       
+        void drawGui();
                 
         void setBoundingBox(glm::vec3 const &a, glm::vec3 const &b);
-        
         
     private:
 
@@ -26,8 +23,9 @@ class SnowCloud : public atlas::utils::Geometry
         std::uniform_real_distribution<float> mUniformDistributionX, mUniformDistributionY, mUniformDistributionZ;
         std::uniform_real_distribution<float> mUniformDistributionVector, mUniformDistributionAngle;        
 
-        float mSnowFlakeRate;
+        int mSnowFlakeRate;
         
+        float mStockpiledSnowflakes;
               
 };
 

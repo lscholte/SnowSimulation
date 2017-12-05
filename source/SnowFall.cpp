@@ -76,7 +76,7 @@ SnowFall::SnowFall()
     mShaders[1].compileShaders();
     mShaders[1].linkShaders();
 
-    mSnowflakeSizeDistribution = std::normal_distribution<float>(0.025f, 0.005f);        
+    mSnowflakeSizeDistribution = std::normal_distribution<float>(0.05f, 0.01f);        
 }
 
 SnowFall::~SnowFall()
