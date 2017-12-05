@@ -274,7 +274,7 @@ void SnowOverlay::drawGui()
 void SnowOverlay::updateVertexNearestTo(glm::vec3 const &query)
 {
     float maxDist = 1.0;
-    float factor = 0.001f;
+    float factor = 0.005f;
     int i = 0;
     for(glm::vec4 &positionAlpha : mPositionsAlpha)
     {
@@ -296,7 +296,7 @@ void SnowOverlay::updateVertexNearestTo(glm::vec3 const &query)
 
         if(positionAlpha.w >= 1.0f)
         {
-            positionAlpha.y += 0.1f * amount;            
+            positionAlpha.y += 0.3f * amount;            
         }
     }
 }
