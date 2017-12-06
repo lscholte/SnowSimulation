@@ -6,7 +6,8 @@
 #include <atlas/utils/GUI.hpp>
 
 SnowCloud::SnowCloud() :
-    mSnowFlakeRate(100)
+    mSnowFlakeRate(100),
+    mStockpiledSnowflakes(0.0f)
 {    
     mUniformDistributionVector = std::uniform_real_distribution<float>(0.0f, 1.0f);
     mUniformDistributionAngle = std::uniform_real_distribution<float>(0.0f, (float) (2.0*M_PI));
@@ -65,6 +66,6 @@ void SnowCloud::drawGui()
 	ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiSetCond_FirstUseEver);
 	
 	ImGui::Begin("Snow Cloud Options");
-	ImGui::SliderInt("Snowflakes Per Second", &mSnowFlakeRate, 0, 500);
+	ImGui::SliderInt("Snowflakes Per Second", &mSnowFlakeRate, 0, 400);
 	ImGui::End();
 }

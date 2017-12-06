@@ -62,7 +62,7 @@ SnowOverlay::SnowOverlay() :
         GLfloat x = 10.0f - i*stepX;
         mPositionsAlpha.push_back(glm::vec4(x, 0.005f, 10.0f, 1.0f));
         mNormals.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-        mTextureCoords.push_back(glm::vec2((float) (i+1) / (factor+2), 1.0f));
+        mTextureCoords.push_back(glm::vec2((float) (factor+1-i) / (factor+2), 1.0f));
     } 
 
     for(int i = 0; i <= factor; ++i)
@@ -70,7 +70,7 @@ SnowOverlay::SnowOverlay() :
         GLfloat z = 10.0f - i*stepZ;
         mPositionsAlpha.push_back(glm::vec4(-10.0f, 0.005f, z, 1.0f));
         mNormals.push_back(glm::vec3(-1.0f, 0.0f, 0.0f));
-        mTextureCoords.push_back(glm::vec2(0.0f, (float) (i+1) / (factor+2)));
+        mTextureCoords.push_back(glm::vec2(0.0f, (float) (factor+1-i) / (factor+2)));
     } 
     
     mIndices.push_back(0xFFFFFFFF);
