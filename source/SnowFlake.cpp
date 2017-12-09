@@ -6,11 +6,11 @@
 int SnowFlake::snowFlakeCount = 0;
 
 SnowFlake::SnowFlake() :
-    mMass(0.01)
+    mMass(0.0001)
 {
     ++(SnowFlake::snowFlakeCount);
     
-    mNormalDistribution = std::normal_distribution<float>(0.0f, 2.0f);    
+    mNormalDistribution = std::normal_distribution<float>(0.0f, mMass*20.0f);    
     mUniformDistribution = std::uniform_real_distribution<float>(0.0f, (float) (2.0*M_PI));
 }
 
@@ -131,19 +131,18 @@ glm::vec3 SnowFlake::computeAcceleration(glm::vec3 const &position, glm::vec3 co
     const float g = 9.81;
     glm::vec3 forceGravity(0.0f, -g*mMass, 0.0f);
 
-    const float radius = 0.0025f; //quarter of a centimeter
-    const float kv = 6.0 * 3.1415926 * radius;
-    const float n = 1.81;
-    glm::vec3 forceViscosity = -kv * n * mVelocity;
+    //Essentially some magical constant that seems to look good
+    //at preventing the snowflakes from falling too quickly
+    const float viscosityConstant = 7.5f;
+    glm::vec3 forceViscosity = -viscosityConstant * mMass * mVelocity;
 
-    glm::vec3 forceWind = mMass * ((SnowScene *)atlas::utils::Application::getInstance().getCurrentScene())->getWindForce();
+    glm::vec3 forceWind =  mMass * ((SnowScene *)atlas::utils::Application::getInstance().getCurrentScene())->getWindForce();
 
     //Adds the flake flutter effect
     float offsetRadius = std::fabs(mNormalDistribution(mGenerator));
     float theta = mUniformDistribution(mGenerator);
-    glm::vec3 offset = mMass * glm::vec3(offsetRadius*cos(theta), 0.0f, offsetRadius*sin(theta));
+    glm::vec3 offset = offsetRadius * glm::vec3(cos(theta), 0.0f, sin(theta));
     
-
     glm::vec3 netForce = forceGravity + forceViscosity + forceWind + offset;
 
     return netForce / mMass;    
