@@ -67,36 +67,27 @@ void SnowFlake::updateGeometry(atlas::core::Time<> const &t)
 
     float deltaTime = t.deltaTime;
 
-	if(true) //use RK4
-	{
-		//Compute the new position by Runge-Kutta Order 4.
-		//based on https://www.intmath.com/differential-equations/12-runge-kutta-rk4-des.php 
-        glm::vec3 v1 = deltaTime * computeVelocity(0);
-		glm::vec3 v2 = deltaTime * computeVelocity(0.5*deltaTime);
-		glm::vec3 v3 = deltaTime * computeVelocity(0.5*deltaTime);
-		glm::vec3 v4 = deltaTime * computeVelocity(deltaTime);
-		newPosition = mPosition + (1.0f / 6.0f) * (v1 + 2.0f*v2 + 2.0f*v3 + v4);
+    //Compute the new position by Runge-Kutta Order 4.
+    //based on https://www.intmath.com/differential-equations/12-runge-kutta-rk4-des.php 
+    glm::vec3 v1 = deltaTime * computeVelocity(0);
+    glm::vec3 v2 = deltaTime * computeVelocity(0.5*deltaTime);
+    glm::vec3 v3 = deltaTime * computeVelocity(0.5*deltaTime);
+    glm::vec3 v4 = deltaTime * computeVelocity(deltaTime);
+    newPosition = mPosition + (1.0f / 6.0f) * (v1 + 2.0f*v2 + 2.0f*v3 + v4);
 
-		//Compute the new velocity by Runge-Kutta Order 4
-		//based on https://www.intmath.com/differential-equations/12-runge-kutta-rk4-des.php
-		glm::vec3 a1 = deltaTime * computeAcceleration(0, mVelocity);
-		glm::vec3 a2 = deltaTime * computeAcceleration(0.5*deltaTime, mVelocity + 0.5f*a1);
-		glm::vec3 a3 = deltaTime * computeAcceleration(0.5*deltaTime, mVelocity + 0.5f*a2);
-		glm::vec3 a4 = deltaTime * computeAcceleration(deltaTime, mVelocity + a3);
-		newVelocity = mVelocity + (1.0f / 6.0f) * (a1 + 2.0f*a2 + 2.0f*a3 + a4);
+    //Compute the new velocity by Runge-Kutta Order 4
+    //based on https://www.intmath.com/differential-equations/12-runge-kutta-rk4-des.php
+    glm::vec3 a1 = deltaTime * computeAcceleration(0, mVelocity);
+    glm::vec3 a2 = deltaTime * computeAcceleration(0.5*deltaTime, mVelocity + 0.5f*a1);
+    glm::vec3 a3 = deltaTime * computeAcceleration(0.5*deltaTime, mVelocity + 0.5f*a2);
+    glm::vec3 a4 = deltaTime * computeAcceleration(deltaTime, mVelocity + a3);
+    newVelocity = mVelocity + (1.0f / 6.0f) * (a1 + 2.0f*a2 + 2.0f*a3 + a4);
 
-		//Compute the new velocity by Runge-Kutta Order 4
-		//based on https://www.intmath.com/differential-equations/12-runge-kutta-rk4-des.php
-		//Update acceleration so that we use it to compute velocity
-		//next the next time we execute Runge-Kutta
-		mAcceleration = (newVelocity - mVelocity) / deltaTime;
-	}
-	else
-	{
-        glm::vec3 a_t = computeAcceleration(0, mVelocity);
-        newPosition = mPosition + mVelocity*deltaTime + 0.5f*a_t*deltaTime*deltaTime;
-        newVelocity = mVelocity + 0.5f*(a_t + computeAcceleration(deltaTime, computeVelocity(deltaTime)))*deltaTime;
-	}
+    //Compute the new velocity by Runge-Kutta Order 4
+    //based on https://www.intmath.com/differential-equations/12-runge-kutta-rk4-des.php
+    //Update acceleration so that we use it to compute velocity
+    //next the next time we execute Runge-Kutta
+    mAcceleration = (newVelocity - mVelocity) / deltaTime;
 
     mPosition = newPosition;
     mVelocity = newVelocity;
